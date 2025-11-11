@@ -1,0 +1,36 @@
+name: 'Setup Server'
+description: 'Install Docker and optional tools on a remote server'
+
+inputs:
+  host:
+    description: 'Server hostname/IP'
+    required: true
+  username:
+    description: 'SSH username'
+    required: true
+  ssh_key:
+    description: 'SSH private key'
+    required: true
+  install_docker:
+    description: 'Install Docker'
+    required: false
+    default: 'true'
+  install_doppler:
+    description: 'Install Doppler CLI'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Server via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ inputs.host }}
+        username: ${{ inputs.username }}
+        key: ${{ inputs.ssh_key }}
+        script: |
+          curl -sSL https://raw.githubusercontent.com/sinnedo-edu/github-actions-modules/main/scripts/setup-docker-server.sh | \
+          INSTALL_DOCKER=${{ inputs.install_docker }} \
+          INSTALL_DOPPLER=${{ inputs.install_doppler }} \
+          bash
