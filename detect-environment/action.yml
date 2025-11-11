@@ -1,0 +1,36 @@
+name: Detect Environment
+description: Detect the current environment based on branch or tag names.
+
+inputs:
+  branch_prefixes:
+    description: 'Comma-separated list of branch prefixes to environment names (e.g., "dev:development,staging:staging,main:production").'
+    required: true
+  tag_prefixes:
+    description: 'Comma-separated list of tag prefixes to environment names (e.g., "v1-:production,v2-:staging").'
+    required: false
+    default: ''
+  event_name:
+    description: 'The name of the GitHub event (e.g., "push", "pull_request").'
+    required: true
+  ref:
+    description: 'The Git ref that triggered the workflow (e.g., "refs/heads/main", "refs/tags/v1.0.0").'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set environment name
+      id: set-env
+      shell: bash
+      run: |
+        if["${{inputs.event_name}}" == "Workflow_Dispatch"]; then
+          echo "environment=${{inputs.environment}}" >> $GITHUB_OUTPUT
+        elif [ "${{inputs.ref}}"] == refs/heads/main" ]; then
+          echo "environment=prod" >> $GITHUB_OUTPUT
+        elif [ "${{ inputs.ref }}" == "refs/heads/beta" ]; then
+          echo "environment=beta" >> $GITHUB_OUTPUT
+        elif [ "${{ inputs.ref }}" == "refs/heads/test" ]; then
+          echo "environment=test" >> $GITHUB_OUTPUT
+        else
+          echo "environment=dev" >> $GITHUB_OUTPUT
+        fi

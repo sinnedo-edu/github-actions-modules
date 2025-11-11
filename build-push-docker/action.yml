@@ -1,0 +1,38 @@
+name: 'Build and Push Docker Image'
+description: 'Build Docker image and push to registry with environment-specific tags'
+
+inputs:
+  linode_token:
+    description: 'Linode API token'
+    required: true
+  image_name:
+    description: 'Docker image name'
+    required: true
+  environment:
+    description: 'Environment name'
+    required: true
+  sha:
+    description: 'Git commit SHA'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Linode Container Registry
+      run: |
+        echo "${{ inputs.linode_token }}" | docker login registry.linode.com -u ${{ inputs.linode_token }} --password-stdin
+      shell: bash
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |
+          registry.linode.com/${{ inputs.image_name }}:${{ inputs.environment }}-latest
+          registry.linode.com/${{ inputs.image_name }}:${{ inputs.environment }}-${{ inputs.sha }}
+        cache-from: type=registry,ref=registry.linode.com/${{ inputs.image_name }}:${{ inputs.environment }}-buildcache
+        cache-to: type=registry,ref=registry.linode.com/${{ inputs.image_name }}:${{ inputs.environment }}-buildcache,mode=max
