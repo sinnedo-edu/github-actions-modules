@@ -1,0 +1,37 @@
+name: 'SSH Deploy Base'
+description: 'Reusable SSH deployment action for executing scripts on remote servers'
+
+inputs:
+  host:
+    description: 'Remote server hostname/IP'
+    required: true
+  username:
+    description: 'SSH username'
+    required: true
+  ssh_key:
+    description: 'SSH private key'
+    required: true
+  ssh_port:
+    description: 'SSH port'
+    required: false
+    default: '22'
+  script:
+    description: 'Script to execute on remote server'
+    required: true
+  envs:
+    description: 'Comma-separated list of environment variables to pass'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Execute script via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ inputs.host }}
+        username: ${{ inputs.username }}
+        key: ${{ inputs.ssh_key }}
+        port: ${{ inputs.ssh_port }}
+        envs: ${{ inputs.envs }}
+        script: ${{ inputs.script }}
