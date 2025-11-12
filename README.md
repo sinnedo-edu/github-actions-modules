@@ -9,7 +9,6 @@ github-actions-modules/
 ├── actions/
 │   ├── build-push-docker/         # Build and push Docker images
 │   ├── detect-environment/        # Environment detection from branches/tags
-│   ├── setup-doppler/            # Doppler secrets management
 │   ├── setup-server/             # Server setup and configuration
 │   └── ssh-deploy-base/          # Base SSH deployment action
 ├── scripts/
@@ -67,25 +66,7 @@ Automatically detect the deployment environment based on branch or tag names.
 - `test` → `test`
 - Others → `dev`
 
-### 3. Setup Doppler
-
-Install Doppler CLI and fetch secrets from your Doppler project.
-
-```yaml
-- uses: sinnedo-edu/github-actions-modules/actions/setup-doppler@v1
-  with:
-    doppler_token: ${{ secrets.DOPPLER_TOKEN }}
-    environment: 'production'
-    project: 'my-app'
-```
-
-**Features:**
-
-- Automatic Doppler CLI installation
-- Secrets downloaded and injected into environment
-- Project and environment configuration
-
-### 4. SSH Deploy Base
+### 3. SSH Deploy Base
 
 Reusable SSH deployment action for executing scripts on remote servers.
 
@@ -109,7 +90,7 @@ Reusable SSH deployment action for executing scripts on remote servers.
 - Configurable SSH port
 - Based on `appleboy/ssh-action`
 
-### 5. Setup Server
+### 4. Setup Server
 
 Initialize and configure a Docker-ready server environment.
 
