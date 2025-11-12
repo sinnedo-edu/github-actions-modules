@@ -23,9 +23,9 @@ runs:
       id: set-env
       shell: bash
       run: |
-        if["${{inputs.event_name}}" == "Workflow_Dispatch"]; then
-          echo "environment=${{inputs.environment}}" >> $GITHUB_OUTPUT
-        elif [ "${{inputs.ref}}"] == refs/heads/main" ]; then
+        if [ "${{ inputs.event_name }}" == "workflow_dispatch" ]; then
+          echo "environment=${{ inputs.environment }}" >> $GITHUB_OUTPUT
+        elif [ "${{ inputs.ref }}" == "refs/heads/main" ]; then
           echo "environment=prod" >> $GITHUB_OUTPUT
         elif [ "${{ inputs.ref }}" == "refs/heads/beta" ]; then
           echo "environment=beta" >> $GITHUB_OUTPUT
@@ -34,3 +34,8 @@ runs:
         else
           echo "environment=dev" >> $GITHUB_OUTPUT
         fi
+
+outputs:
+  environment:
+    description: 'The detected environment name'
+    value: ${{ steps.set-env.outputs.environment }}
