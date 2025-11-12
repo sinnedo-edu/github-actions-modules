@@ -4,23 +4,25 @@ A collection of reusable GitHub Actions and deployment scripts for streamlined C
 
 ## 📦 Repository Structure
 
-```
+```text
 github-actions-modules/
-├── build-push-docker/          # Build and push Docker images
-├── detect-environment/         # Environment detection from branches/tags
-├── setup-doppler/             # Doppler secrets management
-├── setup-server/              # Server setup and configuration
-├── ssh-deploy-base/           # Base SSH deployment action
+├── actions/
+│   ├── build-push-docker/         # Build and push Docker images
+│   ├── detect-environment/        # Environment detection from branches/tags
+│   ├── setup-doppler/            # Doppler secrets management
+│   ├── setup-server/             # Server setup and configuration
+│   └── ssh-deploy-base/          # Base SSH deployment action
 ├── scripts/
-│   ├── deploy-orchestrator.sh      # Master deployment orchestrator
-│   ├── deploy-container.sh         # Container lifecycle management
-│   ├── doppler-setup.sh           # Doppler CLI setup and secrets download
-│   ├── docker-registry-login.sh   # Docker registry authentication
-│   └── setup-docker-server.sh     # Docker server initialization
-└── docs/
-    ├── ABSTRACTION_SUMMARY.md     # Architecture and design details
-    ├── DEPLOYMENT_GUIDE.md        # Deployment instructions
-    └── DEPLOYMENT_CHECKLIST.md    # Pre-deployment checklist
+│   ├── deploy-orchestrator.sh    # Master deployment orchestrator
+│   ├── deploy-container.sh       # Container lifecycle management
+│   ├── doppler-setup.sh          # Doppler CLI setup and secrets download
+│   ├── docker-registry-login.sh  # Docker registry authentication
+│   └── setup-docker-server.sh    # Docker server initialization
+├── ABSTRACTION_SUMMARY.md        # Architecture and design details
+├── DEPLOYMENT_GUIDE.md           # Deployment instructions
+├── DEPLOYMENT_CHECKLIST.md       # Pre-deployment verification
+├── LICENSE                        # MIT License
+└── README.md                      # This file
 ```
 
 ## 🚀 Available Actions
@@ -30,7 +32,7 @@ github-actions-modules/
 Build Docker images and push them to a container registry with environment-specific tags.
 
 ```yaml
-- uses: sinnedo-edu/github-actions-modules/build-push-docker@v1
+- uses: sinnedo-edu/github-actions-modules/actions/build-push-docker@v1
   with:
     linode_token: ${{ secrets.LINODE_TOKEN }}
     image_name: 'my-app'
@@ -39,6 +41,7 @@ Build Docker images and push them to a container registry with environment-speci
 ```
 
 **Features:**
+
 - Docker Buildx support
 - Multi-tag support (environment-latest, environment-sha)
 - Build cache optimization
@@ -49,7 +52,7 @@ Build Docker images and push them to a container registry with environment-speci
 Automatically detect the deployment environment based on branch or tag names.
 
 ```yaml
-- uses: sinnedo-edu/github-actions-modules/detect-environment@v1
+- uses: sinnedo-edu/github-actions-modules/actions/detect-environment@v1
   with:
     branch_prefixes: 'dev:development,staging:staging,main:production'
     tag_prefixes: 'v1-:production,v2-:staging'
@@ -58,6 +61,7 @@ Automatically detect the deployment environment based on branch or tag names.
 ```
 
 **Supported Branches:**
+
 - `main` → `prod`
 - `beta` → `beta`
 - `test` → `test`
@@ -68,7 +72,7 @@ Automatically detect the deployment environment based on branch or tag names.
 Install Doppler CLI and fetch secrets from your Doppler project.
 
 ```yaml
-- uses: sinnedo-edu/github-actions-modules/setup-doppler@v1
+- uses: sinnedo-edu/github-actions-modules/actions/setup-doppler@v1
   with:
     doppler_token: ${{ secrets.DOPPLER_TOKEN }}
     environment: 'production'
@@ -76,6 +80,7 @@ Install Doppler CLI and fetch secrets from your Doppler project.
 ```
 
 **Features:**
+
 - Automatic Doppler CLI installation
 - Secrets downloaded and injected into environment
 - Project and environment configuration
@@ -85,7 +90,7 @@ Install Doppler CLI and fetch secrets from your Doppler project.
 Reusable SSH deployment action for executing scripts on remote servers.
 
 ```yaml
-- uses: sinnedo-edu/github-actions-modules/ssh-deploy-base@v1
+- uses: sinnedo-edu/github-actions-modules/actions/ssh-deploy-base@v1
   with:
     host: ${{ secrets.DEPLOY_HOST }}
     username: ${{ secrets.DEPLOY_USER }}
@@ -98,6 +103,7 @@ Reusable SSH deployment action for executing scripts on remote servers.
 ```
 
 **Features:**
+
 - SSH authentication with private key
 - Environment variable passthrough
 - Configurable SSH port
@@ -108,7 +114,7 @@ Reusable SSH deployment action for executing scripts on remote servers.
 Initialize and configure a Docker-ready server environment.
 
 ```yaml
-- uses: sinnedo-edu/github-actions-modules/setup-server@v1
+- uses: sinnedo-edu/github-actions-modules/actions/setup-server@v1
   with:
     # Server setup configuration
 ```
@@ -140,6 +146,7 @@ curl -sS https://raw.githubusercontent.com/sinnedo-edu/github-actions-modules/ma
 ```
 
 **What it does:**
+
 1. Downloads all required deployment scripts
 2. Sets up Doppler and downloads secrets
 3. Authenticates with Docker registry
@@ -149,6 +156,7 @@ curl -sS https://raw.githubusercontent.com/sinnedo-edu/github-actions-modules/ma
 ### Individual Scripts
 
 #### `doppler-setup.sh`
+
 Install Doppler CLI and download secrets.
 
 ```bash
@@ -158,11 +166,13 @@ download_secrets
 ```
 
 **Required Environment Variables:**
+
 - `DOPPLER_PROJECT` - Doppler project name
 - `DOPPLER_CONFIG` - Environment/config name
 - `OUTPUT_FILE` - Path to save secrets
 
 #### `docker-registry-login.sh`
+
 Authenticate with Docker container registry.
 
 ```bash
@@ -171,9 +181,11 @@ docker_login
 ```
 
 **Required Environment Variables:**
+
 - `LINODE_TOKEN` - Linode API token
 
 #### `deploy-container.sh`
+
 Deploy or update a Docker container.
 
 ```bash
@@ -182,15 +194,18 @@ deploy_container
 ```
 
 **Required Environment Variables:**
+
 - `CONTAINER_NAME` - Name of the container
 - `IMAGE_TAG` - Full image tag to deploy
 - `CONTAINER_PORT_MAPPING` - Port mapping (e.g., "3000:3000")
 - `ENV_FILE_PATH` - Path to environment file (from Doppler)
 
 **Optional Environment Variables:**
+
 - `ASPNETCORE_ENVIRONMENT` - ASP.NET Core environment setting
 
 #### `setup-docker-server.sh`
+
 Initialize a fresh server with Docker and required dependencies.
 
 ```bash
@@ -216,14 +231,14 @@ jobs:
 
       - name: Detect Environment
         id: env
-        uses: sinnedo-edu/github-actions-modules/detect-environment@v1
+        uses: sinnedo-edu/github-actions-modules/actions/detect-environment@v1
         with:
           branch_prefixes: 'main:prod,beta:beta,test:test'
           event_name: ${{ github.event_name }}
           ref: ${{ github.ref }}
 
       - name: Build and Push Docker Image
-        uses: sinnedo-edu/github-actions-modules/build-push-docker@v1
+        uses: sinnedo-edu/github-actions-modules/actions/build-push-docker@v1
         with:
           linode_token: ${{ secrets.LINODE_TOKEN }}
           image_name: 'my-app'
@@ -231,7 +246,7 @@ jobs:
           sha: ${{ github.sha }}
 
       - name: Deploy to Server
-        uses: sinnedo-edu/github-actions-modules/ssh-deploy-base@v1
+        uses: sinnedo-edu/github-actions-modules/actions/ssh-deploy-base@v1
         env:
           LINODE_TOKEN: ${{ secrets.LINODE_TOKEN }}
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
@@ -296,13 +311,14 @@ For production environments, pin to specific versions instead of using `main`:
 
 ```yaml
 # Pin to major version (recommended)
-uses: sinnedo-edu/github-actions-modules/ssh-deploy-base@v1
+uses: sinnedo-edu/github-actions-modules/actions/ssh-deploy-base@v1
 
 # Pin to specific version
-uses: sinnedo-edu/github-actions-modules/ssh-deploy-base@v1.0.0
+uses: sinnedo-edu/github-actions-modules/actions/ssh-deploy-base@v1.0.0
 ```
 
 For scripts:
+
 ```bash
 export SCRIPTS_VERSION="v1.0.0"
 curl -sS https://raw.githubusercontent.com/sinnedo-edu/github-actions-modules/v1.0.0/scripts/deploy-orchestrator.sh | bash
@@ -386,4 +402,4 @@ For issues, questions, or contributions:
 
 ---
 
-**Made with ❤️ for streamlined deployments**
+Made with ❤️ for streamlined deployments
