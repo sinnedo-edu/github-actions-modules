@@ -16,6 +16,7 @@ github-actions-modules/
 │   ├── deploy-container.sh       # Container lifecycle management
 │   ├── doppler-setup.sh          # Doppler CLI setup and secrets download
 │   ├── docker-registry-login.sh  # Docker registry authentication
+│   ├── setup-ssl.sh              # SSL/HTTPS configuration with Caddy
 │   └── setup-docker-server.sh    # Docker server initialization
 ├── ABSTRACTION_SUMMARY.md        # Architecture and design details
 ├── DEPLOYMENT_GUIDE.md           # Deployment instructions
@@ -132,7 +133,8 @@ curl -sS https://raw.githubusercontent.com/sinnedo-edu/github-actions-modules/ma
 2. Sets up Doppler and downloads secrets
 3. Authenticates with Docker registry
 4. Deploys/updates the container
-5. Cleans up temporary files
+5. Configures SSL/HTTPS with Caddy
+6. Cleans up temporary files
 
 ### Individual Scripts
 
@@ -184,6 +186,27 @@ deploy_container
 **Optional Environment Variables:**
 
 - `ASPNETCORE_ENVIRONMENT` - ASP.NET Core environment setting
+
+#### `setup-ssl.sh`
+
+Configure HTTPS access with automatic SSL certificates using Caddy web server.
+
+```bash
+source setup-ssl.sh
+# Script runs automatically with environment variables
+```
+
+**Required Environment Variables:**
+
+- `DOMAIN` - Domain name for SSL certificate (default: sinnedo.com)
+- `APP_PORT` - Internal application port to proxy to (default: 8080)
+
+**What it does:**
+
+- Installs Caddy web server if not present
+- Configures automatic HTTPS with Let's Encrypt certificates
+- Sets up reverse proxy to your application
+- Enables and starts Caddy service
 
 #### `setup-docker-server.sh`
 
@@ -237,11 +260,13 @@ jobs:
           IMAGE_TAG: registry.linode.com/my-app:${{ steps.env.outputs.environment }}-${{ github.sha }}
           CONTAINER_PORT_MAPPING: '3000:3000'
           OUTPUT_FILE: '/tmp/secrets.env'
+          DOMAIN: ${{ secrets.DOMAIN }}
+          APP_PORT: '3000'
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: 'LINODE_TOKEN,DOPPLER_TOKEN,DOPPLER_PROJECT,DOPPLER_CONFIG,CONTAINER_NAME,IMAGE_TAG,CONTAINER_PORT_MAPPING,OUTPUT_FILE'
+          envs: 'LINODE_TOKEN,DOPPLER_TOKEN,DOPPLER_PROJECT,DOPPLER_CONFIG,CONTAINER_NAME,IMAGE_TAG,CONTAINER_PORT_MAPPING,OUTPUT_FILE,DOMAIN,APP_PORT'
           script: |
             curl -sS https://raw.githubusercontent.com/sinnedo-edu/github-actions-modules/main/scripts/deploy-orchestrator.sh | bash
 ```
@@ -258,6 +283,8 @@ ssh user@server << 'EOF'
   export CONTAINER_NAME="my-app"
   export IMAGE_TAG="registry.linode.com/my-app:prod-latest"
   export CONTAINER_PORT_MAPPING="3000:3000"
+  export DOMAIN="yourdomain.com"
+  export APP_PORT="3000"
   
   curl -sS https://raw.githubusercontent.com/sinnedo-edu/github-actions-modules/main/scripts/deploy-orchestrator.sh | bash
 EOF
@@ -279,6 +306,8 @@ export OUTPUT_FILE="/tmp/secrets.env"
 export CONTAINER_NAME="my-app-dev"
 export IMAGE_TAG="registry.linode.com/my-app:dev-latest"
 export CONTAINER_PORT_MAPPING="3000:3000"
+export DOMAIN="yourdomain.com"
+export APP_PORT="3000"
 
 # Run orchestrator locally
 ./scripts/deploy-orchestrator.sh
@@ -319,6 +348,8 @@ curl -sS https://raw.githubusercontent.com/sinnedo-edu/github-actions-modules/v1
 | `CONTAINER_PORT_MAPPING` | Yes | Port mapping (format: "host:container") |
 | `ASPNETCORE_ENVIRONMENT` | No | ASP.NET Core environment setting |
 | `SCRIPTS_VERSION` | No | Script version to use (default: main) |
+| `DOMAIN` | No | Domain name for SSL certificate (default: sinnedo.com) |
+| `APP_PORT` | No | Internal application port for reverse proxy (default: 8080) |
 
 ## 🎯 Benefits
 
