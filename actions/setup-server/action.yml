@@ -27,6 +27,5 @@ runs:
         key: ${{ inputs.ssh_key }}
         script: |
           curl -sSL https://raw.githubusercontent.com/sinnedo-edu/github-actions-modules/main/scripts/setup-docker-server.sh | \
-          INSTALL_DOCKER=${{ inputs.install_docker }} | \
-          curl -sSL https://raw.githubusercontent.com/sinnedo-edu/github-actions-modules/main/scripts/setup-ssl.sh | \
+          INSTALL_DOCKER=${{ inputs.install_docker }} \
           bash
