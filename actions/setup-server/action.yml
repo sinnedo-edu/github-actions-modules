@@ -15,10 +15,6 @@ inputs:
     description: 'Install Docker'
     required: false
     default: 'true'
-  install_doppler:
-    description: 'Install Doppler CLI'
-    required: false
-    default: 'false'
 
 runs:
   using: 'composite'
@@ -31,6 +27,6 @@ runs:
         key: ${{ inputs.ssh_key }}
         script: |
           curl -sSL https://raw.githubusercontent.com/sinnedo-edu/github-actions-modules/main/scripts/setup-docker-server.sh | \
-          INSTALL_DOCKER=${{ inputs.install_docker }} \
-          INSTALL_DOPPLER=${{ inputs.install_doppler }} \
+          INSTALL_DOCKER=${{ inputs.install_docker }} | \
+          curl -sSL https://raw.githubusercontent.com/sinnedo-edu/github-actions-modules/main/scripts/setup-ssl.sh | \
           bash

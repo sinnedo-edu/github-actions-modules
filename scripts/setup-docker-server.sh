@@ -9,13 +9,17 @@ NC='\033[0m' # No Color
 
 # Configuration
 INSTALL_DOCKER="${INSTALL_DOCKER:-true}"
-INSTALL_DOPPLER="${INSTALL_DOPPLER:-false}"
 DOCKER_USER="${DOCKER_USER:-$USER}"
 INSTALL_COMPOSE="${INSTALL_COMPOSE:-true}"
 
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Server Setup for Docker Deployments${NC}"
 echo -e "${GREEN}========================================${NC}"
+
+if [! -f /etc/debian_version ]; then
+    echo -e "${RED}This script is intended for Debian-based systems.${NC}"
+    exit 1
+fi
 
 # Function to check if command exists
 command_exists() {
@@ -63,19 +67,6 @@ if [ "$INSTALL_DOCKER" = "true" ]; then
         
         echo -e "${GREEN}Docker installed successfully!${NC}"
         docker --version
-    fi
-fi
-
-# Install Doppler CLI
-if [ "$INSTALL_DOPPLER" = "true" ]; then
-    if command_exists doppler; then
-        echo -e "${YELLOW}Doppler CLI is already installed.${NC}"
-        doppler --version
-    else
-        echo -e "${GREEN}Installing Doppler CLI...${NC}"
-        curl -Ls --tlsv1.2 --proto "=https" --retry 3 https://cli.doppler.com/install.sh | sudo sh
-        echo -e "${GREEN}Doppler CLI installed successfully!${NC}"
-        doppler --version
     fi
 fi
 
