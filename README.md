@@ -169,7 +169,7 @@ docker_login
 
 #### `deploy-container.sh`
 
-Deploy or update a Docker container.
+Deploy or update a Docker container with automatic persistence and restart capabilities.
 
 ```bash
 source deploy-container.sh
@@ -186,6 +186,13 @@ deploy_container
 **Optional Environment Variables:**
 
 - `ASPNETCORE_ENVIRONMENT` - ASP.NET Core environment setting
+
+**Features:**
+
+- **Automatic Persistence**: Uses `--restart always` policy
+- **Systemd Integration**: Creates systemd service for proper startup ordering
+- **Boot Persistence**: Container automatically restarts after server reboots
+- **Health Monitoring**: Includes status checks and logging
 
 #### `setup-ssl.sh`
 
@@ -313,7 +320,61 @@ export APP_PORT="3000"
 ./scripts/deploy-orchestrator.sh
 ```
 
-## 🔧 Configuration
+## 🔧 Troubleshooting
+
+### Container Not Starting After Reboot
+
+If your container doesn't start automatically after a server reboot:
+
+**Check Docker Service:**
+
+```bash
+sudo systemctl status docker
+sudo systemctl is-enabled docker
+```
+
+**Check Container Restart Policy:**
+
+```bash
+docker inspect your-container-name --format '{{.HostConfig.RestartPolicy.Name}}'
+```
+
+**Check Systemd Service:**
+
+```bash
+sudo systemctl status your-app-name.service
+sudo systemctl is-enabled your-app-name.service
+```
+
+**Manual Restart:**
+
+```bash
+# Start Docker if not running
+sudo systemctl start docker
+
+# Start container manually
+docker start your-container-name
+
+# Or restart the systemd service
+sudo systemctl restart your-app-name.service
+```
+
+### SSL Certificate Issues
+
+If HTTPS isn't working after reboot:
+
+**Check Caddy Status:**
+
+```bash
+sudo systemctl status caddy
+sudo journalctl -u caddy -n 50
+```
+
+**Renew Certificates:**
+
+```bash
+sudo systemctl reload caddy
+```
 
 ### Version Pinning
 

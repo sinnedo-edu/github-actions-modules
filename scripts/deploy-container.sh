@@ -44,7 +44,7 @@ run_container() {
     
     local docker_run_cmd="docker run -d \
         --name ${CONTAINER_NAME} \
-        --restart unless-stopped \
+        --restart always \
         -p ${CONTAINER_PORT_MAPPING}"
     
     # Add environment file if provided
@@ -69,10 +69,33 @@ run_container() {
     eval "$docker_run_cmd"
 }
 
-# Function to cleanup old images
-cleanup_old_images() {
-    echo "Cleaning up old Docker images"
-    docker image prune -af --filter "until=24h"
+# Function to create systemd service for container persistence
+create_systemd_service() {
+    echo "Creating systemd service for container persistence"
+    
+    local service_file="/etc/systemd/system/${CONTAINER_NAME}.service"
+    
+    cat << EOF | sudo tee "$service_file" > /dev/null
+[Unit]
+Description=Docker Container ${CONTAINER_NAME}
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/docker start ${CONTAINER_NAME}
+ExecStop=/usr/bin/docker stop ${CONTAINER_NAME}
+ExecReload=/usr/bin/docker restart ${CONTAINER_NAME}
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    sudo systemctl daemon-reload
+    sudo systemctl enable "${CONTAINER_NAME}.service"
+    echo "Systemd service created and enabled: ${CONTAINER_NAME}.service"
 }
 
 # Function to display deployment status
@@ -82,6 +105,8 @@ show_deployment_status() {
     echo "==================================="
     echo "Container: ${CONTAINER_NAME}"
     echo "Image: ${IMAGE_TAG}"
+    echo "Restart Policy: $(docker inspect ${CONTAINER_NAME} --format '{{.HostConfig.RestartPolicy.Name}}' 2>/dev/null || echo 'unknown')"
+    echo "Systemd Service: $(systemctl is-enabled ${CONTAINER_NAME}.service 2>/dev/null || echo 'not created')"
     echo ""
     docker ps -a | grep "${CONTAINER_NAME}" || echo "Container not found!"
     echo ""
@@ -97,6 +122,7 @@ main() {
     pull_image
     cleanup_existing_container
     run_container
+    create_systemd_service
     cleanup_old_images
     show_deployment_status
     

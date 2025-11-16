@@ -2,8 +2,8 @@
 
 set -e
 
-DOMAIN ="${DOMAIN:-sinnedo.com}"
-APP_PORT ="${APP_PORT:-8080}"
+DOMAIN="${DOMAIN:-sinnedo.com}"
+APP_PORT="${APP_PORT:-8080}"
 
 echo "Setting up https with Caddy for ${DOMAIN} on port ${APP_PORT}"
 
