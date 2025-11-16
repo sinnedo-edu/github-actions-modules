@@ -33,3 +33,4 @@ EOF
 else
     echo "Caddy is already installed."
 fi
+echo "HTTPS setup complete for ${DOMAIN}."
