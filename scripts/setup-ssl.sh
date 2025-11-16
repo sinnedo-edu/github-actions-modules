@@ -20,10 +20,10 @@ if ! command -v caddy &> /dev/null; then
 
     # Configure Caddy
     cat <<EOF | sudo tee /etc/caddy/Caddyfile
-${DOMAIN} {
-    reverse_proxy localhost:${APP_PORT}
-}
-EOF
+    ${DOMAIN} {
+        reverse_proxy localhost:${APP_PORT}
+    }
+    EOF
 
     # Restart Caddy to apply changes
     sudo systemctl restart caddy
