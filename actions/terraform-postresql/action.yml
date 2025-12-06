@@ -1,0 +1,88 @@
+name: Terraform Linode PostgreSQL Deploy
+
+on:
+  workflow_call:
+    inputs:
+      linode_token:
+        required: true
+        type: string
+      db_label:
+        required: true
+        type: string
+      db_engine:
+        required: true
+        type: string
+      region:
+        required: true
+        type: string
+      instance_type:
+        required: true
+        type: string
+      cluster_size:
+        required: false
+        type: number
+        default: 1
+      allow_list:
+        required: false
+        type: string   # Pass JSON string for list variables
+        default: '["0.0.0.0/0"]'
+      encrypted:
+        required: false
+        type: boolean
+        default: true
+      ssl_connection:
+        required: false
+        type: boolean
+        default: true
+      updates_day_of_week:
+        required: false
+        type: string
+        default: "sunday"
+      updates_hour_of_day:
+        required: false
+        type: number
+        default: 0
+      updates_frequency:
+        required: false
+        type: string
+        default: "monthly"
+      tags:
+        required: false
+        type: string   # Pass JSON string for list variables
+        default: '["github-actions"]'
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      TF_WORKING_DIR: postgresql
+      LINODE_TOKEN: ${{ inputs.linode_token }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Terraform Init
+      working-directory: ${{ env.TF_WORKING_DIR }}
+      run: terraform init
+
+    - name: Terraform Apply
+      working-directory: ${{ env.TF_WORKING_DIR }}
+      run: |
+        terraform apply -auto-approve \
+          -var "linode_token=${{ inputs.linode_token }}" \
+          -var "db_label=${{ inputs.db_label }}" \
+          -var "db_engine=${{ inputs.db_engine }}" \
+          -var "region=${{ inputs.region }}" \
+          -var "instance_type=${{ inputs.instance_type }}" \
+          -var "cluster_size=${{ inputs.cluster_size }}" \
+          -var "allow_list=${{ inputs.allow_list }}" \
+          -var "encrypted=${{ inputs.encrypted }}" \
+          -var "ssl_connection=${{ inputs.ssl_connection }}" \
+          -var "updates_day_of_week=${{ inputs.updates_day_of_week }}" \
+          -var "updates_hour_of_day=${{ inputs.updates_hour_of_day }}" \
+          -var "updates_frequency=${{ inputs.updates_frequency }}" \
+          -var "tags=${{ inputs.tags }}"
